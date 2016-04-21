@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>小明啊喂</title>
+  <subtitle>小明，不只是冷笑话的主角。</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://sylarlove.coding.me/"/>
+  <updated>2016-04-21T02:05:46.209Z</updated>
+  <id>http://sylarlove.coding.me/</id>
+  
+  <author>
+    <name>武继明</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>让Feign支持PATCH方法</title>
+    <link href="http://sylarlove.coding.me/2016/04/21/%E8%AE%A9Feign%E6%94%AF%E6%8C%81PATCH%E6%96%B9%E6%B3%95/"/>
+    <id>http://sylarlove.coding.me/2016/04/21/让Feign支持PATCH方法/</id>
+    <published>2016-04-21T01:37:57.000Z</published>
+    <updated>2016-04-21T02:05:46.209Z</updated>
+    
+    <content type="html">&lt;h1 id=&quot;问题描述&quot;&gt;&lt;a href=&quot;#问题描述&quot; class=&quot;headerlink&quot; title=&quot;问题描述&quot;&gt;&lt;/a&gt;问题描述&lt;/h1&gt;&lt;p&gt; FeignClient 中声明了这么一个方法&lt;br&gt; &lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;@RequestMapping&lt;/span&gt;(method = RequestMethod.PATCH, value = &lt;span class=&quot;string&quot;&gt;&quot;/agents/&amp;#123;id&amp;#125;&quot;&lt;/span&gt;, consumes = &lt;span class=&quot;string&quot;&gt;&quot;application/json&quot;&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;update&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(@PathVariable(&lt;span class=&quot;string&quot;&gt;&quot;id&quot;&lt;/span&gt;)&lt;/span&gt;String id, @RequestBody Map&amp;lt;String,Object&amp;gt; info)&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt; 其它得方法调用都能成功，就是这个方法调用得时候报异常：&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;com.netflix.hystrix.exception.HystrixRuntimeException: update timed-out and no fallback available.&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;...&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;h1 id=&quot;解决过程&quot;&gt;&lt;a href=&quot;#解决过程&quot; class=&quot;headerlink&quot; title=&quot;解决过程&quot;&gt;&lt;/a&gt;解决过程&lt;/h1&gt;&lt;p&gt;这个异常是 hystrix（断路器）抛出的，只能看出来调用超时。为了排除干扰，我先暂时禁用Feign的断路器：在配置文件加&lt;code&gt;feign.hystrix.enabled: false&lt;/code&gt;，然后再次调用试试：&lt;br&gt;这次异常信息能看出来了，看来失败信息确实是被hystrix给吃了。。。&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;feign.RetryableException: Invalid HTTP method: PATCH executing PATCH http://agent-info/agents/0123456748&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;...&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;Caused by: java.net.ProtocolException: Invalid HTTP method: PATCH&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  at java.net.HttpURLConnection.setRequestMethod(HttpURLConnection.java:440)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;...&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;看来这个问题是因为java.net.HttpURLConnection.setRequestMethod 不支持PATCH方法，无法将请求发送出去。&lt;br&gt;HttpClient 应该支持PATCH方法。&lt;br&gt;谷歌一下关键词 &lt;code&gt;spring feign httpclient patch&lt;/code&gt; 找到 &lt;a href=&quot;https://github.com/spring-cloud/spring-cloud-netflix/issues/412#issuecomment-121642881&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;答案&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&quot;解决方式&quot;&gt;&lt;a href=&quot;#解决方式&quot; class=&quot;headerlink&quot; title=&quot;解决方式&quot;&gt;&lt;/a&gt;解决方式&lt;/h1&gt;&lt;p&gt;netflix 有feign的httpclient支持。maven加入下面的依赖就搞定了。&lt;br&gt;&lt;figure class=&quot;highlight xml&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;dependency&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;   &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;groupId&lt;/span&gt;&amp;gt;&lt;/span&gt;com.netflix.feign&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;groupId&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;   &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;name&quot;&gt;artifactId&lt;/span&gt;&amp;gt;&lt;/span&gt;feign-httpclient&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;artifactId&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;name&quot;&gt;dependency&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      使用Feign做PATCH请求得时候失败的解决办法。
+    
+    </summary>
+    
+    
+      <category term="Spring Cloud" scheme="http://sylarlove.coding.me/tags/Spring-Cloud/"/>
+    
+      <category term="微服务" scheme="http://sylarlove.coding.me/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>使用extjs模板创建应用</title>
+    <link href="http://sylarlove.coding.me/2016/04/20/%E4%BD%BF%E7%94%A8extjs%E6%A8%A1%E6%9D%BF%E5%88%9B%E5%BB%BA%E5%BA%94%E7%94%A8/"/>
+    <id>http://sylarlove.coding.me/2016/04/20/使用extjs模板创建应用/</id>
+    <published>2016-04-20T09:04:50.000Z</published>
+    <updated>2016-04-20T09:05:33.942Z</updated>
+    
+    <content type="html"></content>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+      <category term="extjs" scheme="http://sylarlove.coding.me/tags/extjs/"/>
+    
+      <category term="前端" scheme="http://sylarlove.coding.me/tags/%E5%89%8D%E7%AB%AF/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>数据库设计规范</title>
+    <link href="http://sylarlove.coding.me/2016/04/19/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1%E8%A7%84%E8%8C%83/"/>
+    <id>http://sylarlove.coding.me/2016/04/19/数据库设计规范/</id>
+    <published>2016-04-19T08:26:49.000Z</published>
+    <updated>2016-04-19T08:33:21.031Z</updated>
+    
+    <content type="html">&lt;h2 id=&quot;数据库命名规范&quot;&gt;&lt;a href=&quot;#数据库命名规范&quot; class=&quot;headerlink&quot; title=&quot;数据库命名规范&quot;&gt;&lt;/a&gt;数据库命名规范&lt;/h2&gt;&lt;p&gt;包括表命名规范、字段命名规范、外键明明规范和索引命名规范。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;表命名规则&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;数据库表的命名以是名词的复数形式且都为小写，如&lt;strong&gt;regions&lt;/strong&gt;, &lt;strong&gt;brands&lt;/strong&gt;, &lt;strong&gt;goods&lt;/strong&gt;,&lt;strong&gt;skus&lt;/strong&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;如果表名由几个单词组成，则单词间用下划线分割，如&lt;strong&gt;order_items&lt;/strong&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;表名尽量用全名，表名长度限制在&lt;em&gt;30&lt;/em&gt;个字符内，当表名超过30个字符时，可用缩写来减少表名长度。&lt;br&gt;如：description –&amp;gt; desc ; information –&amp;gt; info ; address –&amp;gt; addr;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;表字段名命名规则&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;字段名为小写 。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;字段名为有意义的单词，或单词的缩写 。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;如果字段由几个单词组成，则单词间用下划线分割，如&lt;strong&gt;client_id&lt;/strong&gt;，&lt;strong&gt;post_code&lt;/strong&gt;,&lt;strong&gt;order_id&lt;/strong&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;字段名限制在30个字符内。当字段名超过30字符时，可用缩写来减少字段名的长度，&lt;br&gt;如description –&amp;gt; desc；information –&amp;gt; info；address –&amp;gt; addr。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;索引命名规则&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;索引须按照&lt;strong&gt;IDX_table_column&lt;/strong&gt;。&lt;br&gt; 其中table是建立索引的表名，column是建立索引的字段名&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;索引名限制在30个字符内。当索引名超过30字符时，可用缩写来减少索引名的长度。&lt;br&gt; 如description –&amp;gt; desc；information –&amp;gt; info；address –&amp;gt; addr。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;主键、外键命名规则&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;主键按照PK_table的规则命名，其中table为数据库表名。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;唯一键按照UK_table_column的规则命名。&lt;br&gt;其中table为数据块表名，column为字段名。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;外键按照FK_pppp_cccc_nn的规则命名。&lt;br&gt;其中pppp为父表名，cccc为子表名，nn为序列号 。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;规范化设计的一些基本要求&quot;&gt;&lt;a href=&quot;#规范化设计的一些基本要求&quot; class=&quot;headerlink&quot; title=&quot;规范化设计的一些基本要求&quot;&gt;&lt;/a&gt;规范化设计的一些基本要求&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;表中应该避免可为空的列&lt;/p&gt;
+&lt;p&gt; 虽然表中允许空列，但是，空字段是一种比较特殊的数据类型。数据库在处理的时候，需要进行特殊的处理。&lt;br&gt;如此的话，就会增加数据库处理记录的复杂性。当表中有比较多的空字段时，在同等条件下，数据库处理的性能会降低许多。&lt;/p&gt;
+&lt;p&gt;解决方法:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;ol&gt;
+&lt;li&gt;是通过设置默认值的形式，来避免空字段的产生&lt;/li&gt;
+&lt;li&gt;是若一张表中，允许为空的列比较多，接近表全部列数的三分之一。而且，这些列在大部分情况下，都是可有可无的。若数据库管理员遇到这种情况，建议另外建立一张副表，以保存这些列。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;表不应该有重复的值或者列。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;表中记录应该有一个唯一的标识符。&lt;/li&gt;
+&lt;li&gt;数据库对象要有统一的前缀名。&lt;/li&gt;
+&lt;li&gt;尽量只存储单一实体类型的数据。&lt;/li&gt;
+&lt;li&gt;尽量符合数据库的几个范式。&lt;/li&gt;
+&lt;/ol&gt;
+</content>
+    
+    <summary type="html">
+    
+      数据库设计中的一些规范。
+    
+    </summary>
+    
+    
+      <category term="数据库" scheme="http://sylarlove.coding.me/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>oracle统计时间间隔</title>
+    <link href="http://sylarlove.coding.me/2016/04/19/oracle%E7%BB%9F%E8%AE%A1%E6%97%B6%E9%97%B4%E9%97%B4%E9%9A%94/"/>
+    <id>http://sylarlove.coding.me/2016/04/19/oracle统计时间间隔/</id>
+    <published>2016-04-19T06:54:49.000Z</published>
+    <updated>2016-04-19T08:01:23.189Z</updated>
+    
+    <content type="html">&lt;p&gt;今天有个活，要求统计出昨天客户的下单间隔。&lt;/p&gt;
+&lt;p&gt;就是说统计出客户第n+1单的下单时间减去第n单的下单时间。首先想到了oracle的两个分析函数 &lt;code&gt;lag&lt;/code&gt; 和 &lt;code&gt;lead&lt;/code&gt;.&lt;br&gt;&lt;a id=&quot;more&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Lag和Lead函数可以在一次查询中取出同一字段的前N行的数据和后N行的值。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;他们得用法是一样的.&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;fun(value_expr [,offset][,default]) over([query_partition_clause] order by Order_by_clause)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;figure class=&quot;highlight sql&quot;&gt;&lt;figcaption&gt;&lt;span&gt;sql代码&lt;/span&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;select&lt;/span&gt; member_name,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;create_time,&lt;span class=&quot;keyword&quot;&gt;lead&lt;/span&gt;(create_time) &lt;span class=&quot;keyword&quot;&gt;over&lt;/span&gt;(&lt;span class=&quot;keyword&quot;&gt;partition&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;by&lt;/span&gt; member_name &lt;span class=&quot;keyword&quot;&gt;order&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;by&lt;/span&gt; create_time) next_order_time,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;round&lt;/span&gt;((&lt;span class=&quot;keyword&quot;&gt;lead&lt;/span&gt;(create_time) &lt;span class=&quot;keyword&quot;&gt;over&lt;/span&gt;(&lt;span class=&quot;keyword&quot;&gt;partition&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;by&lt;/span&gt; member_name &lt;span class=&quot;keyword&quot;&gt;order&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;by&lt;/span&gt; create_time)-create_time)*&lt;span class=&quot;number&quot;&gt;24&lt;/span&gt;*&lt;span class=&quot;number&quot;&gt;60&lt;/span&gt;) &lt;span class=&quot;built_in&quot;&gt;interval&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;from&lt;/span&gt; t_order&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;where&lt;/span&gt; create_time &lt;span class=&quot;keyword&quot;&gt;between&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;sysdate&lt;/span&gt;&lt;span class=&quot;number&quot;&gt;-2&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;sysdate&lt;/span&gt;&lt;span class=&quot;number&quot;&gt;-1&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;blockquote&gt;
+&lt;p&gt;oracle 中时间相减&lt;em&gt;24&lt;/em&gt;60转换为分钟。round() 四舍五入。&lt;/p&gt;
+&lt;/blockquote&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;今天有个活，要求统计出昨天客户的下单间隔。&lt;/p&gt;
+&lt;p&gt;就是说统计出客户第n+1单的下单时间减去第n单的下单时间。首先想到了oracle的两个分析函数 &lt;code&gt;lag&lt;/code&gt; 和 &lt;code&gt;lead&lt;/code&gt;.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="oracle" scheme="http://sylarlove.coding.me/tags/oracle/"/>
+    
+      <category term="数据库" scheme="http://sylarlove.coding.me/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+    
+  </entry>
+  
+</feed>

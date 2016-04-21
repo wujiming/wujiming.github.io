@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+    
+  <url>
+    <loc>http://sylarlove.coding.me/2016/04/21/%E8%AE%A9Feign%E6%94%AF%E6%8C%81PATCH%E6%96%B9%E6%B3%95/</loc>
+    <lastmod>2016-04-21T02:05:46.209Z</lastmod>
+    <data>
+        <display>
+        <title>让Feign支持PATCH方法</title>
+        <pubTime>2016-04-21T01:37:57.000Z</pubTime>
+        
+        <tag>Spring Cloud </tag>
+         
+        <tag>微服务 </tag>
+         
+         
+           
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://sylarlove.coding.me/2016/04/20/%E4%BD%BF%E7%94%A8extjs%E6%A8%A1%E6%9D%BF%E5%88%9B%E5%BB%BA%E5%BA%94%E7%94%A8/</loc>
+    <lastmod>2016-04-20T09:05:33.942Z</lastmod>
+    <data>
+        <display>
+        <title>使用extjs模板创建应用</title>
+        <pubTime>2016-04-20T09:04:50.000Z</pubTime>
+        
+        <tag>extjs </tag>
+         
+        <tag>前端 </tag>
+         
+         
+           
+        </display>
+    </data>
+    </url>
+
+    
+    
+    
+  <url>
+    <loc>http://sylarlove.coding.me/2016/04/19/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1%E8%A7%84%E8%8C%83/</loc>
+    <lastmod>2016-04-19T08:33:21.031Z</lastmod>
+    <data>
+        <display>
+        <title>数据库设计规范</title>
+        <pubTime>2016-04-19T08:26:49.000Z</pubTime>
+        
+        <tag>数据库 </tag>
+         
+         
+           
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://sylarlove.coding.me/2016/04/19/oracle%E7%BB%9F%E8%AE%A1%E6%97%B6%E9%97%B4%E9%97%B4%E9%9A%94/</loc>
+    <lastmod>2016-04-19T08:01:23.189Z</lastmod>
+    <data>
+        <display>
+        <title>oracle统计时间间隔</title>
+        <pubTime>2016-04-19T06:54:49.000Z</pubTime>
+        
+        <tag>oracle </tag>
+         
+        <tag>数据库 </tag>
+         
+         
+           
+        </display>
+    </data>
+    </url>
+
+    
+    
+</urlset>
