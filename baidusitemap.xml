@@ -2,6 +2,26 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
     
+  <url>
+    <loc>http://sylarlove.coding.me/2016/04/20/%E4%BD%BF%E7%94%A8extjs%E6%A8%A1%E6%9D%BF%E5%88%9B%E5%BB%BA%E5%BA%94%E7%94%A8/</loc>
+    <lastmod>2016-04-21T04:05:55.430Z</lastmod>
+    <data>
+        <display>
+        <title>使用extjs模板创建应用</title>
+        <pubTime>2016-04-20T09:04:50.000Z</pubTime>
+        
+        <tag>extjs </tag>
+         
+        <tag>前端 </tag>
+         
+         
+           
+        </display>
+    </data>
+    </url>
+
+    
+    
     
   <url>
     <loc>http://sylarlove.coding.me/2016/04/19/oracle%E7%BB%9F%E8%AE%A1%E6%97%B6%E9%97%B4%E9%97%B4%E9%9A%94/</loc>
@@ -14,25 +34,6 @@
         <tag>oracle </tag>
          
         <tag>数据库 </tag>
-         
-         
-           
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://sylarlove.coding.me/2016/04/20/%E4%BD%BF%E7%94%A8extjs%E6%A8%A1%E6%9D%BF%E5%88%9B%E5%BB%BA%E5%BA%94%E7%94%A8/</loc>
-    <lastmod>2016-04-21T03:27:35.089Z</lastmod>
-    <data>
-        <display>
-        <title>使用extjs模板创建应用</title>
-        <pubTime>2016-04-20T09:04:50.000Z</pubTime>
-        
-        <tag>extjs </tag>
-         
-        <tag>前端 </tag>
          
          
            
@@ -76,7 +77,6 @@
     </data>
     </url>
 
-    
     
     
 </urlset>
